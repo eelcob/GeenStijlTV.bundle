@@ -39,58 +39,19 @@ def Start():
 def MainMenu():
 	oc = ObjectContainer()
 	
-	oc.add(DirectoryObject(key = Callback(HomePage, pageUrl=URL_ROOT_URI, title=L('LastFive')), title=L('LastFive'), thumb=R(ICON_RECENT), art=R(ART)))
-	oc.add(DirectoryObject(key = Callback(ArchivePage, pageUrl=URL_ARCHIEF, title=L('Archive')), title=L('Archive'), thumb=R(ICON_ARCHIVE), art=R(ART)))
-	oc.add(InputDirectoryObject(key = Callback(SearchPage, pageUrl=URL_ZOEKEN, title=L('Search')), title=L('Search'), thumb=R(ICON_ZOEKEN), art=R(ART), prompt=L('Search')))
+	oc.add(DirectoryObject(key = Callback(HomePage, pageUrl=URL_ROOT_URI, title=L('LastFive')), title=L('LastFive'), thumb=R(ICON_RECENT)))
+	oc.add(DirectoryObject(key = Callback(ArchivePage, pageUrl=URL_ARCHIEF, title=L('Archive')), title=L('Archive'), thumb=R(ICON_ARCHIVE)))
+	oc.add(InputDirectoryObject(key = Callback(SearchPage, pageUrl=URL_ZOEKEN, title=L('Search')), title=L('Search'), thumb=R(ICON_ZOEKEN), prompt=L('Search')))
 
 	return oc
 
 ####################################################################################################
 def HomePage(pageUrl, title):
 
-	oc = ObjectContainer(title2=title, art=R(ART))
+	oc = ObjectContainer(title2=title)
 	oc.view_group = 'Details'
-	oc = ParseHomePage(oc, pageUrl)
-	
-	return oc
 
-####################################################################################################
-def ArchivePage(pageUrl, title):
-
-	oc = ObjectContainer(title2=title, art=R(ART))
-	oc.view_group = 'Details'
-	oc = ParseArchivePage(oc, pageUrl)
-	
-	return oc
-
-####################################################################################################
-def SearchPage(pageUrl, title, query):
-
-	oc = ObjectContainer(title2=title, art=R(ART))
-	oc.view_group = 'List'
-	
-	keywords = query.replace(" ", "%20")  
-	pageUrl = pageUrl + keywords
-	
-	oc = ParseSearchPage(oc, pageUrl)
-	
-	return oc
-	
-####################################################################################################
-def ParseArchivePage(oc, url):
-
-	for result in HTML.ElementFromURL(url).xpath('//o/li'):  		
-		title = result.xpath('.//a')[0].text
-		url = result.xpath('.//a')[0].get('href')
-
-		oc.add(DirectoryObject(key = Callback(OpenArchiveMonthItem, title=title, url=url), title=title, thumb=R(ICON_ARCHIVE)))
-
-	return oc
-
-####################################################################################################
-def ParseHomePage(oc, url):
-
-	for result in HTML.ElementFromURL(url).xpath('//article[@id]'):  
+	for result in HTML.ElementFromURL(pageUrl).xpath('//article[@id]'):  
 		title = result.xpath('.//h1')[0].text
 		summary = result.xpath('.//img')[0].text
 		url = result.xpath('.//a')[0].get('href')
@@ -103,12 +64,32 @@ def ParseHomePage(oc, url):
 		thumb=thumb
 		))
 		
-	return oc
+	return oc	
+
 
 ####################################################################################################
-def ParseSearchPage(oc, url):
+def ArchivePage(pageUrl, title):
 
-	data = HTTP.Request(url).content.decode('latin-1')
+	oc = ObjectContainer(title2=title)
+	oc.view_group = 'Details'
+	
+	for result in HTML.ElementFromURL(pageUrl).xpath('//o/li'):  		
+		title = result.xpath('.//a')[0].text
+		url = result.xpath('.//a')[0].get('href')
+
+		oc.add(DirectoryObject(key = Callback(OpenArchiveMonthItem, title=title, url=url), title=title, thumb=R(ICON_ARCHIVE)))
+		
+	return oc	
+
+####################################################################################################
+def SearchPage(pageUrl, title, query):
+
+	oc = ObjectContainer(title2=title)
+	
+	keywords = query.replace(" ", "%20")  
+	pageUrl = pageUrl + keywords
+
+	data = HTTP.Request(pageUrl).content.decode('latin-1')
 	
 	data = data.replace('<b style="color:black;background-color:#FFFF00">', "")
 	data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
@@ -138,7 +119,7 @@ def ParseSearchPage(oc, url):
 ####################################################################################################
 def OpenArchiveMonthItem(title, url):
 
-	oc = ObjectContainer(title2=title, art=R(ART))
+	oc = ObjectContainer(title2=title)
 	oc.view_group = 'Details'
 	
 	for result in HTML.ElementFromURL(url).xpath('//article/ol/li'):  
