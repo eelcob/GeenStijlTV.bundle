@@ -75,19 +75,7 @@ def SearchPage(pageUrl, title, query):
 	oc = ParseSearchPage(oc, pageUrl)
 	
 	return oc
-
-####################################################################################################
-def ParseHomePage(oc, url):
-
-	for result in HTML.ElementFromURL(url).xpath('//article[@id]'):  
-		title = result.xpath('.//h1')[0].text
-		summary = result.xpath('.//img')[0].text
-		url = result.xpath('.//a')[0].get('href')
-		
-		oc = getClipInfo(oc, url, title, summary)	
 	
-	return oc
-
 ####################################################################################################
 def ParseArchivePage(oc, url):
 
@@ -98,7 +86,25 @@ def ParseArchivePage(oc, url):
 		oc.add(DirectoryObject(key = Callback(OpenArchiveMonthItem, title=title, url=url), title=title, thumb=R(ICON_ARCHIVE)))
 
 	return oc
-	
+
+####################################################################################################
+def ParseHomePage(oc, url):
+
+	for result in HTML.ElementFromURL(url).xpath('//article[@id]'):  
+		title = result.xpath('.//h1')[0].text
+		summary = result.xpath('.//img')[0].text
+		url = result.xpath('.//a')[0].get('href')
+		thumb = ""
+		
+		oc.add(VideoClipObject(
+		url = url,
+		title = title,
+		summary = summary,
+		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
+		))
+		
+	return oc
+
 ####################################################################################################
 def ParseSearchPage(oc, url):
 
@@ -115,8 +121,14 @@ def ParseSearchPage(oc, url):
 		title = result.xpath('.//a')[0].text
 		summary = result.xpath('.//p')[0].text
 		url = result.xpath('.//a')[0].get('href')
+		thumb = ""
 		
-		oc = getClipInfo(oc, url, title, summary)	
+		oc.add(VideoClipObject(
+		url = url,
+		title = title,
+		summary = summary,
+		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
+		))
 	
 	if len(oc) == 0:
 		oc = MessageContainer(L('Search'),L('NoResult'))
@@ -133,48 +145,55 @@ def OpenArchiveMonthItem(title, url):
 		title = result.xpath('.//a')[0].text
 		url = result.xpath('.//a')[0].get('href')
 		summary = ""
-
-		oc = getClipInfo(oc, url, title, summary)	
-
-	return oc	
-
-####################################################################################################
-def getClipInfo(oc, url, title, summary):
-	
-	data = HTTP.Request(url).content
-	content = HTML.ElementFromString(data)
-	
-	cliplink = VIDLINK.findall(data)
-	thumb = THUMBLINK.findall(data)
-	try:
-		thumb = thumb[0]
-	except:
 		thumb = ""
-			
-	if cliplink == []:
-		cliplink = VIDLINK2.findall(data)
-		try:
-			thumb = content.xpath('.//article/img')[0].get('src')				
-		except:
-			Log(L('ImageError'))
-			
-		if cliplink == []:
-			cliplink = VIDLINK3.findall(data)
-			try:
-				thumb = content.xpath('.//article/img')[0].get('src')
-			except:
-				Log(L('ImageError'))				
-				
-	if cliplink == []:
-		Log(L('ClipErr'))
-	else:
-		cliplink = cliplink[0]
-			
+
 		oc.add(VideoClipObject(
-		url = cliplink,
+		url = url,
 		title = title,
 		summary = summary,
 		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
 		))
-	
-	return oc
+
+	return oc	
+
+####################################################################################################
+#def getClipInfo(oc, url, title, summary):
+#	
+#	data = HTTP.Request(url).content
+#	content = HTML.ElementFromString(data)
+#	
+#	cliplink = VIDLINK.findall(data)
+#	thumb = THUMBLINK.findall(data)
+#	try:
+#		thumb = thumb[0]
+#	except:
+#		thumb = ""
+#			
+#	if cliplink == []:
+#		cliplink = VIDLINK2.findall(data)
+#		try:
+#			thumb = content.xpath('.//article/img')[0].get('src')				
+#		except:
+#			Log(L('ImageError'))
+#			
+#		if cliplink == []:
+#			cliplink = VIDLINK3.findall(data)
+#			try:
+#				thumb = content.xpath('.//article/img')[0].get('src')
+#			except:
+#				Log(L('ImageError'))				
+#				
+#	if cliplink == []:
+#		Log(L('ClipErr'))
+#	else:
+#		cliplink = cliplink[0]
+#			
+#		oc.add(VideoClipObject(
+#		url = cliplink,
+#		title = title,
+#		summary = summary,
+#		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
+#		))
+#	
+#	return oc
+#
