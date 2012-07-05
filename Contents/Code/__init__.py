@@ -132,7 +132,7 @@ def ParseSearchPage(oc, url):
 	
 	if len(oc) == 0:
 		oc = MessageContainer(L('Search'),L('NoResult'))
-	
+
 	return oc
 	
 ####################################################################################################
@@ -155,45 +155,3 @@ def OpenArchiveMonthItem(title, url):
 		))
 
 	return oc	
-
-####################################################################################################
-#def getClipInfo(oc, url, title, summary):
-#	
-#	data = HTTP.Request(url).content
-#	content = HTML.ElementFromString(data)
-#	
-#	cliplink = VIDLINK.findall(data)
-#	thumb = THUMBLINK.findall(data)
-#	try:
-#		thumb = thumb[0]
-#	except:
-#		thumb = ""
-#			
-#	if cliplink == []:
-#		cliplink = VIDLINK2.findall(data)
-#		try:
-#			thumb = content.xpath('.//article/img')[0].get('src')				
-#		except:
-#			Log(L('ImageError'))
-#			
-#		if cliplink == []:
-#			cliplink = VIDLINK3.findall(data)
-#			try:
-#				thumb = content.xpath('.//article/img')[0].get('src')
-#			except:
-#				Log(L('ImageError'))				
-#				
-#	if cliplink == []:
-#		Log(L('ClipErr'))
-#	else:
-#		cliplink = cliplink[0]
-#			
-#		oc.add(VideoClipObject(
-#		url = cliplink,
-#		title = title,
-#		summary = summary,
-#		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
-#		))
-#	
-#	return oc
-#
