@@ -94,13 +94,13 @@ def ParseHomePage(oc, url):
 		title = result.xpath('.//h1')[0].text
 		summary = result.xpath('.//img')[0].text
 		url = result.xpath('.//a')[0].get('href')
-		thumb = ""
+		thumb = Callback(GetThumb, url = url)
 		
 		oc.add(VideoClipObject(
 		url = url,
 		title = title,
 		summary = summary,
-		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
+		thumb=thumb
 		))
 		
 	return oc
@@ -121,13 +121,13 @@ def ParseSearchPage(oc, url):
 		title = result.xpath('.//a')[0].text
 		summary = result.xpath('.//p')[0].text
 		url = result.xpath('.//a')[0].get('href')
-		thumb = ""
+		thumb = Callback(GetThumb, url = url)
 		
 		oc.add(VideoClipObject(
 		url = url,
 		title = title,
 		summary = summary,
-		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
+		thumb=thumb
 		))
 	
 	if len(oc) == 0:
@@ -145,13 +145,36 @@ def OpenArchiveMonthItem(title, url):
 		title = result.xpath('.//a')[0].text
 		url = result.xpath('.//a')[0].get('href')
 		summary = ""
-		thumb = ""
-
+		thumb = Callback(GetThumb, url = url)
+		
 		oc.add(VideoClipObject(
 		url = url,
 		title = title,
 		summary = summary,
-		thumb=Resource.ContentsOfURLWithFallback(url=thumb, fallback=R(ICON))
+		thumb = thumb,
 		))
 
 	return oc	
+
+####################################################################################################
+def GetThumb(url):
+
+	data = HTTP.Request(url).content
+	content = HTML.ElementFromString(data)
+	thumb = THUMBLINK.findall(data)
+	
+	try:
+		thumb = thumb[0]
+	except:
+		try:
+			thumb = content.xpath('.//article/img')[0].get('src')				
+		except:
+			Log.Debug('no images found')
+			thumb = ""
+	
+	try:
+		data = HTTP.Request(thumb, cacheTime=CACHE_1WEEK).content
+		Log.Debug(thumb)
+		return DataObject(data, 'image/jpeg')
+	except:
+		return Redirect(R(ICON))
