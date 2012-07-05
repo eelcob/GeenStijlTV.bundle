@@ -48,9 +48,8 @@ def MainMenu():
 ####################################################################################################
 def HomePage(pageUrl, title):
 
-	oc = ObjectContainer(title2=title)
-	oc.view_group = 'Details'
-
+	oc = ObjectContainer(title2=title, view_group='Details')
+	
 	for result in HTML.ElementFromURL(pageUrl).xpath('//article[@id]'):  
 		title = result.xpath('.//h1')[0].text
 		summary = result.xpath('.//img')[0].text
@@ -70,9 +69,8 @@ def HomePage(pageUrl, title):
 ####################################################################################################
 def ArchivePage(pageUrl, title):
 
-	oc = ObjectContainer(title2=title)
-	oc.view_group = 'Details'
-	
+	oc = ObjectContainer(title2=title, view_group='Details')
+		
 	for result in HTML.ElementFromURL(pageUrl).xpath('//o/li'):  		
 		title = result.xpath('.//a')[0].text
 		url = result.xpath('.//a')[0].get('href')
@@ -119,9 +117,8 @@ def SearchPage(pageUrl, title, query):
 ####################################################################################################
 def OpenArchiveMonthItem(title, url):
 
-	oc = ObjectContainer(title2=title)
-	oc.view_group = 'Details'
-	
+	oc = ObjectContainer(title2=title, view_group='Details')
+		
 	for result in HTML.ElementFromURL(url).xpath('//article/ol/li'):  
 		title = result.xpath('.//a')[0].text
 		url = result.xpath('.//a')[0].get('href')
@@ -155,7 +152,6 @@ def GetThumb(url):
 	
 	try:
 		data = HTTP.Request(thumb, cacheTime=CACHE_1WEEK).content
-		Log.Debug(thumb)
 		return DataObject(data, 'image/jpeg')
 	except:
 		return Redirect(R(ICON))
