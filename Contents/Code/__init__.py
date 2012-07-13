@@ -49,7 +49,7 @@ def HomePage(title):
 	for result in HTML.ElementFromURL(URL_ROOT_URI).xpath('//article[@id]'):
 		title = result.xpath('./h1/text()')[0]
 		summary = result.xpath('./p/text()')[0]
-		url = result.xpath('.//a')[0].get('href')
+		url = result.xpath('.//strong/a')[0].get('href')
 		thumb = Callback(GetThumb, url = url)
 		
 		oc.add(VideoClipObject(

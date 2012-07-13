@@ -1,0 +1,59 @@
+URL_ROOT_URI       	= "http://www.geenstijl.tv/"
+URL_ZOEKEN         	= URL_ROOT_URI + "fastsearch?query="
+THUMBLINK			= Regex('GSvideo.preview = \'(.*?)\';')
+
+ART 				= 'art-default.png'
+
+####################################################################################################
+def Search(query):
+	oc = ObjectContainer(title1="Search", art=R(ART))
+	
+	pageUrl = URL_ZOEKEN
+	keywords = query.replace(" ", "%20")  
+	pageUrl = pageUrl + keywords
+
+	data = HTTP.Request(pageUrl).content.decode('latin-1')
+	
+	data = data.replace('<b style="color:black;background-color:#FFFF00">', "")
+	data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
+	data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
+	data = data.replace('<b style="color:black;background-color:#FF9999">', "")
+	data = data.replace('<b style="color:black;background-color:#FF66FF">', "")
+	data = data.replace('</b>', "")
+		
+	for result in HTML.ElementFromString(data).xpath('//article[@class="artikel"]'):  	
+		title = result.xpath('.//a')[0].text
+		summary = result.xpath('.//p')[0].text
+		url = result.xpath('.//a')[0].get('href')
+		thumb = Callback(GetThumb, url = url)
+		
+		oc.add(VideoClipObject(
+			url = url,
+			title = title,
+			summary = summary,
+			thumb=thumb
+		))
+
+	return oc
+	
+####################################################################################################
+def GetThumb(url):
+
+	data = HTTP.Request(url).content
+	content = HTML.ElementFromString(data)
+	thumb = THUMBLINK.findall(data)
+	
+	try:
+		thumb = thumb[0]
+	except:
+		try:
+			thumb = content.xpath('.//article/img')[0].get('src')				
+		except:
+			Log.Debug('no images found')
+			thumb = ""
+	
+	try:
+		data = HTTP.Request(thumb, cacheTime=CACHE_1WEEK).content
+		return DataObject(data, 'image/jpeg')
+	except:
+		return Redirect(R(ICON))
