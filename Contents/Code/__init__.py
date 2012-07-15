@@ -1,5 +1,5 @@
 NAME 			= L('Title')
-ART 			= "art-default.png"
+ART 			= "art-default.jpg"
 ICON 			= "icon-default.png"
 ICON_MORE		= "icon-next.png"
 ICON_ARCHIVE 	= "icon-archive.png"
