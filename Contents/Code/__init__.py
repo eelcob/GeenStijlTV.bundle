@@ -37,7 +37,7 @@ def MainMenu():
 
 	oc.add(DirectoryObject(key = Callback(HomePage, title=L('LastFive')), title=L('LastFive'), thumb=R(ICON_RECENT)))
 	oc.add(DirectoryObject(key = Callback(ArchivePage, title=L('Archive')), title=L('Archive'), thumb=R(ICON_ARCHIVE)))
-	oc.add(InputDirectoryObject(key = Callback(SearchPage, title=L('Search')), title=L('Search'), thumb=R(ICON_ZOEKEN), prompt=L('Search')))
+	oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.geenstijltv", title = L('Search'), prompt = L('Search'), thumb = R(ICON_ZOEKEN)))
 
 	return oc
 
@@ -49,7 +49,7 @@ def HomePage(title):
 	for result in HTML.ElementFromURL(URL_ROOT_URI).xpath('//article[@id]'):
 		title = result.xpath('./h1/text()')[0]
 		summary = result.xpath('./p/text()')[0]
-		url = result.xpath('.//a')[0].get('href')
+		url = result.xpath('.//strong/a')[0].get('href')
 		thumb = Callback(GetThumb, url = url)
 		
 		oc.add(VideoClipObject(
@@ -71,41 +71,6 @@ def ArchivePage(title):
 		url = result.xpath('.//a')[0].get('href')
 
 		oc.add(DirectoryObject(key = Callback(OpenArchiveMonthItem, title=title, url=url), title=title, thumb=R(ICON_ARCHIVE)))
-
-	return oc
-
-####################################################################################################
-def SearchPage(title, query):
-
-	oc = ObjectContainer(title2=title)
-
-	keywords = query.replace(" ", "%20")
-	url = '%s%s' % (URL_ZOEKEN, keywords)
-
-	data = HTTP.Request(url).content.decode('latin-1')
-
-	data = data.replace('<b style="color:black;background-color:#FFFF00">', "")
-	data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
-	data = data.replace('<b style="color:black;background-color:#00FFFF">', "")
-	data = data.replace('<b style="color:black;background-color:#FF9999">', "")
-	data = data.replace('<b style="color:black;background-color:#FF66FF">', "")
-	data = data.replace('</b>', "")
-
-	for result in HTML.ElementFromString(data).xpath('//article[@class="artikel"]'):
-		title = result.xpath('.//a')[0].text
-		summary = result.xpath('.//p')[0].text
-		url = result.xpath('.//a')[0].get('href')
-		thumb = Callback(GetThumb, url = url)
-
-		oc.add(VideoClipObject(
-			url = url,
-			title = title,
-			summary = summary,
-			thumb = thumb
-		))
-
-	if len(oc) == 0:
-		oc = MessageContainer(L('Search'), L('NoResult'))
 
 	return oc
 
